@@ -19,7 +19,6 @@ jobs:
       - name: Calcular versão
         id: ver
         run: |
-          VERSAO="sha-${GITHUB_SHA::7}"
           echo "versao=$VERSAO" >> "$GITHUB_OUTPUT"     # output do step
           echo "APP_VERSION=$VERSAO" >> "$GITHUB_ENV"   # variável para os próximos steps
 
