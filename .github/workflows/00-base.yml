@@ -1,0 +1,16 @@
+# PONTO DE PARTIDA — pipeline básica da aula anterior.
+# Roda os testes em todo push e todo PR. Nada de secret, nada de condição.
+name: 00 - base
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rodar testes
+        run: python3 -m unittest discover -s app -v

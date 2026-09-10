@@ -1,0 +1,37 @@
+# EXERCÍCIO 2 — Passando valores entre steps e entre jobs
+# Objetivo: gerar a versão (sha-xxxxxxx) em um step, reaproveitar em outro step
+# e em OUTRO JOB. Isso é o que toda pipeline de deploy faz.
+name: 02 - outputs
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      versao: ${{ steps.ver.outputs.versao }}   # exporta o output do step para o job
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Calcular versão
+        id: ver
+        run: |
+          VERSAO="sha-${GITHUB_SHA::7}"
+          echo "versao=$VERSAO" >> "$GITHUB_OUTPUT"     # output do step
+          echo "APP_VERSION=$VERSAO" >> "$GITHUB_ENV"   # variável para os próximos steps
+
+      - name: Usar no mesmo job (via GITHUB_ENV)
+        run: python3 app/app.py      # deve imprimir "versão: sha-xxxxxxx"
+
+  publicar:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Usar em outro job (via needs)
+        run: |
+          echo "Publicando a versão ${{ needs.build.outputs.versao }}"
+          # TODO: faça este step FALHAR se a versão vier vazia.
+          # Dica: [ -n "..." ] || exit 1

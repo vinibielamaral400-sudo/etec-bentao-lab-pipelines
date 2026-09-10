@@ -1,0 +1,36 @@
+# EXERCÍCIO 6 (BÔNUS) — Matrix, exclude, continue-on-error, concurrency
+name: 06 - matrix
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+# Se dois pushes chegarem seguidos, cancela o run antigo em vez de rodar os dois.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  testes:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.11", "3.12", "3.13"]
+        exclude:
+          - os: windows-latest
+            python: "3.11"
+        include:
+          - os: ubuntu-latest
+            python: "3.15-dev"      # versão experimental: pode não existir/quebrar
+            experimental: true
+    # TODO: se a combinação experimental quebrar, ela NÃO pode derrubar a pipeline.
+    # Dica: continue-on-error aceita expressão; use matrix.experimental.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m unittest discover -s app -v

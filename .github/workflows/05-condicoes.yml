@@ -1,0 +1,47 @@
+# EXERCÍCIO 5 — Condicionando: gatilhos, if, needs, failure()
+# Objetivo: a MESMA pipeline se comporta diferente conforme o evento.
+#   PR            → só testes
+#   push na main  → testes + deploy
+#   manual        → escolhe o ambiente
+name: 05 - condicoes
+
+on:
+  pull_request:
+    paths:
+      - "app/**"
+      - ".github/workflows/05-condicoes.yml"
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      ambiente:
+        description: "Onde fazer o deploy?"
+        type: choice
+        options: [homolog, producao]
+        default: homolog
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m unittest discover -s app -v
+
+      - name: Avisar se quebrou
+        if: failure()          # só roda quando um step anterior falhou
+        run: echo "::error::Testes quebraram no commit ${GITHUB_SHA::7} — avisar o time"
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: testes
+    # TODO: este job só pode rodar em push na main OU em execução manual.
+    # Complete o if abaixo (dica: github.event_name, github.ref).
+    if: ${{ false }}
+    steps:
+      - name: Deploy em homolog
+        if: github.event_name == 'push' || inputs.ambiente == 'homolog'
+        run: echo "deploy em HOMOLOG"
+
+      - name: Deploy em producao
+        if: inputs.ambiente == 'producao'
+        run: echo "deploy em PRODUCAO"

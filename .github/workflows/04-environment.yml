@@ -1,0 +1,42 @@
+# EXERCÍCIO 4 — Environment: secret escopado + aprovação humana → deploy em PRODUCAO
+#
+# ANTES DE RODAR (repositório precisa ser PÚBLICO no plano Free):
+#   Settings → Environments → New environment → "producao"
+#     ✔ Required reviewers → adicione você mesmo
+#     Environment secrets → DEPLOY_TOKEN = <o token DEPLOY_TOKEN que VOCÊ recebeu>
+name: 04 - environment
+
+on:
+  workflow_dispatch:
+
+env:
+  # Padrão commitado pelo instrutor antes da aula (URL não é secret). vars.API_URL, se existir, sobrescreve.
+  API_URL: ${{ vars.API_URL || 'https://aula-pipelines-api.whitebeach-095a4bcb.brazilsouth.azurecontainerapps.io' }}
+
+jobs:
+  sem-environment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tenta ler DEPLOY_TOKEN sem declarar environment
+        env:
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+        run: |
+          echo "Tamanho: ${#DEPLOY_TOKEN}"
+          # Esperado: 0. Este job NÃO enxerga o secret do environment.
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: sem-environment
+    # TODO: ligue este job ao environment "producao" (1 linha).
+    # Ao rodar, o job deve PARAR e esperar sua aprovação — e só então o deploy em producao acontece.
+    steps:
+      - name: Deploy em PRODUCAO (chamada real)
+        env:
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+        run: |
+          [ -n "$DEPLOY_TOKEN" ] || { echo "::error::sem token — o environment não foi declarado"; exit 1; }
+          if [ -z "$API_URL" ] || [ "$API_URL" = "https://aula-pipelines-api.whitebeach-095a4bcb.brazilsouth.azurecontainerapps.io" ]; then echo "API_URL vazia — modo simulado"; echo "deploy simulado em producao"; exit 0; fi
+          curl --fail-with-body -sS -X POST "$API_URL/deploy" \
+            -H "Authorization: Bearer $DEPLOY_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "{\"versao\":\"sha-${GITHUB_SHA::7}\",\"ambiente\":\"producao\"}"

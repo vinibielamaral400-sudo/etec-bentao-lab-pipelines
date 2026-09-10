@@ -1,0 +1,30 @@
+# EXERCÍCIO 7 — Políticas: este é o status check que a regra da main vai exigir.
+# O nome do JOB ("testes") é o que aparece na lista de "Required status checks".
+#
+# PASSOS (na interface, não no YAML):
+#   1. Faça um push desta versão para a main (ainda sem regra) — o check "testes" precisa
+#      aparecer pelo menos uma vez para o GitHub listá-lo.
+#   2. Settings → Rules → Rulesets → New branch ruleset
+#        Name: protege-main · Enforcement: Active · Target: Default branch
+#        ✔ Restrict deletions   ✔ Block force pushes
+#        ✔ Require a pull request before merging (Required approvals: 0 — você não pode aprovar o próprio PR)
+#        ✔ Require status checks to pass → adicione "testes"
+#   3. Tente: git commit --allow-empty -m "direto na main" && git push  → deve ser REJEITADO
+#   4. Crie a branch quebra-teste, mude o texto "Olá" em app/app.py, abra PR → merge BLOQUEADO
+#   5. Conserte, push, merge liberado.
+name: 07 - politicas
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read        # menor privilégio: o GITHUB_TOKEN deste workflow só lê
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m unittest discover -s app -v

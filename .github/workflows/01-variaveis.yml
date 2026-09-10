@@ -1,0 +1,35 @@
+# EXERCÍCIO 1 — Variáveis e precedência
+# Objetivo: descobrir na prática quem ganha quando a mesma variável é definida
+# em 3 níveis (workflow, job, step) e usar uma variável do repositório (vars).
+#
+# ANTES DE RODAR: Settings → Secrets and variables → Actions → Variables →
+#   New repository variable → APP_NAME = <seu nome>-api
+name: 01 - variaveis
+
+on:
+  workflow_dispatch:
+
+env:
+  AMBIENTE: workflow        # nível 1
+
+jobs:
+  mostrar:
+    runs-on: ubuntu-latest
+    env:
+      AMBIENTE: job           # nível 2 — sobrescreve o do workflow
+    steps:
+      - name: Quem ganha?
+        env:
+          AMBIENTE: step      # nível 3 — TODO: comente esta linha e rode de novo. O que muda?
+        run: |
+          echo "AMBIENTE = $AMBIENTE"
+
+      - name: Variável do repositório + contexto github
+        run: |
+          echo "APP_NAME  = ${{ vars.APP_NAME }}"
+          echo "branch    = ${{ github.ref_name }}"
+          echo "commit    = $GITHUB_SHA"
+          echo "ator      = $GITHUB_ACTOR"
+
+      # TODO (desafio): adicione um step que imprima o valor de AMBIENTE
+      # SEM definir env nele. Antes de rodar, escreva aqui o que você espera: ______
