@@ -30,6 +30,9 @@ jobs:
           echo "branch    = ${{ github.ref_name }}"
           echo "commit    = $GITHUB_SHA"
           echo "ator      = $GITHUB_ACTOR"
+          - name: Variável do repositório + contexto github
+        run: |
+          echo "AMBIENTE = AMBIENTE"
 
       # TODO (desafio): adicione um step que imprima o valor de AMBIENTE
       # SEM definir env nele. Antes de rodar, escreva aqui o que você espera: ______
