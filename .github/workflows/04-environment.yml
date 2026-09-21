@@ -27,6 +27,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: sem-environment
+    environment: producao
     # TODO: ligue este job ao environment "producao" (1 linha).
     # Ao rodar, o job deve PARAR e esperar sua aprovação — e só então o deploy em producao acontece.
     steps:
