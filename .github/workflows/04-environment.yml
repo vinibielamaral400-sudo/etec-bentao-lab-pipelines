@@ -35,7 +35,7 @@ jobs:
           DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
         run: |
           [ -n "$DEPLOY_TOKEN" ] || { echo "::error::sem token — o environment não foi declarado"; exit 1; }
-          if [ -z "$API_URL" ] || [ "$API_URL" = "https://aula-pipelines-api.whitebeach-095a4bcb.brazilsouth.azurecontainerapps.io" ]; then echo "API_URL vazia — modo simulado"; echo "deploy simulado em producao"; exit 0; fi
+          if [ -z "$API_URL" ] || [ "$API_URL" = "https://aula-pipelines-api.calmpebble-9580033f.brazilsouth.azurecontainerapps.io" ]; then echo "API_URL vazia — modo simulado"; echo "deploy simulado em producao"; exit 0; fi
           curl --fail-with-body -sS -X POST "$API_URL/deploy" \
             -H "Authorization: Bearer $DEPLOY_TOKEN" \
             -H "Content-Type: application/json" \
